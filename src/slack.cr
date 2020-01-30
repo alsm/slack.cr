@@ -15,31 +15,18 @@ require "./slack/**"
 # slack.run
 # ```
 class Slack
-  property wss : String | Nil
-  property config
+  property wss : String?
   # Returns me, as the current slack user.
   property me : User?
-  # List of users in current Slack.
-  property users : Slack::Users
-  # Preferences
-  property prefs : JSON::Any?
-  # Channels in current Slack session.
-  property channels : Hash(String, Slack::Channel)
   # Websocket connection.
   property socket : HTTP::WebSocket?
-
   property debug = false
-
-  # @config : JSON::Any
 
   @me : User?
   @mid : Int32
-  @self : JSON::Any?
 
   def initialize(@token : String)
     @mid = 0
-    @users = Slack::Users.new
-    @channels = Hash(String, Slack::Channel).new
     @endpoint = "slack.com"
     @callbacks = Hash(Slack::Event.class, Array(Proc(Slack, Slack::Event, Nil))).new { |h, k| h[k] = Array(Proc(Slack, Slack::Event, Nil)).new }
     start
@@ -51,20 +38,11 @@ class Slack
     @callbacks[event] << cb
   end
 
-  # Calls Slack rtm.start method to get initial websocket connection parameters
+  # Calls Slack rtm.connect method to get initial websocket connection parameters
   private def start
     client = HTTP::Client.new @endpoint, tls: true
-    response = client.get("/api/rtm.start?token=#{@token}")
-    response.status_code # => 200
-    response.body
+    response = client.get("/api/rtm.connect?token=#{@token}")
     config = Slack::Hello.from_json(response.body)
-    config.users.each do |user|
-      @users << user
-    end
-    config.channels.each do |channel|
-      @channels[channel.id] = channel
-      @channels["#" + channel.name] = channel
-    end
     if config
       @wss = config.url
       @me = config.me

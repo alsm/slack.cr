@@ -3,9 +3,7 @@ class Slack
     JSON.mapping({
       ok:       Bool,
       me:       {type: User, key: "self"},
-      users:    Array(User),
       url:      String,
-      channels: Array(Slack::Channel),
     })
   end
 end
@@ -33,9 +31,9 @@ class Slack
     JSON.mapping({
       id:      String,
       name:    String,
-      topic:   {type: Topic, nilable: true},
-      purpose: {type: Topic, nilable: true},
-      members: {type: Array(String), nilable: true},
+      topic:   Topic?,
+      purpose: Topic?,
+      members: Array(String)?,
     })
 
     struct Topic
