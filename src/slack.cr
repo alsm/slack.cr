@@ -28,6 +28,7 @@ class Slack
   def initialize(@token : String)
     @mid = 0
     @endpoint = "slack.com"
+    @client = HTTP::Client.new @endpoint, tls: true
     @callbacks = Hash(Slack::Event.class, Array(Proc(Slack, Slack::Event, Nil))).new { |h, k| h[k] = Array(Proc(Slack, Slack::Event, Nil)).new }
     start
   end
