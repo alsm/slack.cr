@@ -14,6 +14,10 @@ class Slack
         subtype: String?,
       )
 
+      def im?
+        @channel[0] == 'D'
+      end
+
       def mentioned_users
         text.match(/<@(\S+)>/) do |m|
           return [m.string]
@@ -66,10 +70,6 @@ class Slack
             return true
           end
         end
-      end
-
-      def post(text : String)
-        Response.new(channel, text)
       end
 
       def reply(text : String)
